@@ -1,0 +1,70 @@
+# Signature Templates should be placed in C:\Users\USERNAME\AppData\Roaming\Microsoft\Signatures
+# File Names updated are Default.EXTENSION
+# A listing of available values to use can be viewed with:
+# Connect-AzureAD -AccountId $userPrincipalName
+# $UserObject = Get-AzureADUser -ObjectId $userPrincipalName
+# Use these to confirm user's information is set in Azure AD properties if there's issues
+
+
+# Create signatures folder if not exists
+if (-not (Test-Path "$($env:APPDATA)\Microsoft\Signatures")) {
+    $null = New-Item -Path "$($env:APPDATA)\Microsoft\Signatures" -ItemType Directory
+}
+
+Start-Transcript -Path "$($env:APPDATA)\IntuneOutlookSignature.txt" -Force
+
+
+Install-PackageProvider -Name NuGet -Scope CurrentUser -Force
+Install-Module -Name AzureAD -Scope CurrentUser -Force
+
+# Get Current User, SSO AzureAD
+$UserPrincipalName = whoami -upn
+Connect-AzureAD -AccountId $userPrincipalName
+
+# Get AzureAD User Information
+$UserObject = Get-AzureADUser -ObjectId $userPrincipalName
+
+# Signature Files - C:\Users\USERNAME\Microsoft\Signatures
+# Only Getting ones named Default
+$SignatureFiles = Get-ChildItem -Path "$env:APPDATA\Microsoft\Signatures" | Where Name -Like *Default*
+
+foreach ($SignatureFile in $SignatureFiles) {
+    if ($SignatureFile.Name -like "*.htm" -or $SignatureFile.Name -like "*.rtf" -or $SignatureFile.Name -like "*.txt") {
+        # Get file content with placeholder values
+        $SignatureFileContent = Get-Content -Path $SignatureFiles.FullName
+
+        # Replace placeholder values
+        $SignatureFileContent = $SignatureFileContent -replace "%DisplayName%", $UserObject.DisplayName
+        $SignatureFileContent = $SignatureFileContent -replace "%GivenName%", $UserObject.GivenName
+        $SignatureFileContent = $SignatureFileContent -replace "%Surname%", $UserObject.Surname
+        $SignatureFileContent = $SignatureFileContent -replace "%Mail%", $UserObject.Mail
+        $SignatureFileContent = $SignatureFileContent -replace "%Mobile%", $UserObject.Mobile
+        $SignatureFileContent = $SignatureFileContent -replace "%TelephoneNumber%", $UserObject.TelephoneNumber
+        $SignatureFileContent = $SignatureFileContent -replace "%JobTitle%", $UserObject.JobTitle
+        $SignatureFileContent = $SignatureFileContent -replace "%Department%", $UserObject.Department
+        $SignatureFileContent = $SignatureFileContent -replace "%City%", $UserObject.City
+        $SignatureFileContent = $SignatureFileContent -replace "%Country%", $UserObject.Country
+        $SignatureFileContent = $SignatureFileContent -replace "%StreetAddress%", $UserObject.StreetAddress
+        $SignatureFileContent = $SignatureFileContent -replace "%PostalCode%", $UserObject.PostalCode
+        $SignatureFileContent = $SignatureFileContent -replace "%Country%", $UserObject.Country
+        $SignatureFileContent = $SignatureFileContent -replace "%State%", $UserObject.State
+        $SignatureFileContent = $SignatureFileContent -replace "%PhysicalDeliveryOfficeName%", $UserObject.PhysicalDeliveryOfficeName
+
+        # Set file content with actual values in $env:APPDATA\Microsoft\Signatures
+        Set-Content -Path "$($env:APPDATA)\Microsoft\Signatures\$($SignatureFiles.Name)" -Value $SignatureFileContent -Force
+    } elseif ($SignatureFiles.getType().Name -eq 'DirectoryInfo') {
+        Copy-Item -Path $SignatureFiles.FullName -Destination "$($env:APPDATA)\Microsoft\Signatures\$($SignatureFiles.Name)" -Recurse -Force
+    }
+}
+
+## Uncomment Lines below to force the Default signature AND prevent users from changing
+
+#$RegisteryPath = "Registry::HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\16.0\Common\MailSettings"
+#$NewEmailRegName = "NewSignature"
+#$ReplayEmailRegValue = "ReplySignature"
+#$RegValue = "Default.htm"
+#$NewEmailRegLog = New-ItemProperty -Path $RegisteryPath -Value $RegValue -Name $NewEmailRegName -PropertyType ExpandString -Force
+#$ReplayEmailRelLog = New-ItemProperty -Path $RegisteryPath -Value $RegValue -Name $ReplayEmailRegValue -PropertyType ExpandString -Force
+ 
+
+Stop-Transcript
