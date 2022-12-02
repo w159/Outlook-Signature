@@ -1,0 +1,16 @@
+%DisplayName% %JobTitle%
+Henssler CPAs & Advisers, LLC
+%StreetAddress%
+%City%, %State% %PostalCode%
+ 
+Direct: %TelephoneNumber%
+Main: 770-429-9166
+Fax: 770-428-3852
+Email: %Mail%
+Web: www.hensslercpa.com
+
+Henssler Tax Portal:  Tax Portal Access | Pay Tax Bill
+ 
+Twitter | Facebook | YouTube | LinkedIn | Instagram | Money Talks Podcast
+The information contained in this electronic message and any attachments is privileged and confidential information intended only for the use of the recipient(s) named herein.  If you have received this electronic message in error, you are prohibited from copying, distributing or using the information.  Please contact the sender immediately by return e-mail and delete the original message.  Thank you.
+Under U.S. Treasury Regulations we are required to inform you that any tax advice contained in this e-mail or any attachment hereto is not intended to be used, and cannot be used, to avoid penalties imposed under the Internal Revenue Code.
